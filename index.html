@@ -28,44 +28,88 @@
     font-size: 0.9rem;
   }
 
+  /* Firebase status */
+  .fb-status {
+    text-align: center;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+  }
+  .fb-status.connected { background: rgba(46,204,113,0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+  .fb-status.disconnected { background: rgba(231,76,60,0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+  .fb-status.config-needed { background: rgba(243,156,18,0.2); color: #f39c12; border: 1px solid #f39c12; cursor: pointer; }
+
+  /* Config modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #1e2a3a;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 28px;
+    width: 90%;
+    max-width: 520px;
+  }
+  .modal h2 { color: #FFD700; margin-bottom: 8px; font-size: 1.2rem; }
+  .modal p { font-size: 0.82rem; opacity: 0.7; margin-bottom: 16px; line-height: 1.6; }
+  .modal textarea {
+    width: 100%;
+    height: 180px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: white;
+    font-family: monospace;
+    font-size: 0.78rem;
+    padding: 10px;
+    resize: vertical;
+    margin-bottom: 12px;
+  }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-primary { background: #27ae60; color: white; border: none; padding: 9px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 9px 20px; border-radius: 8px; cursor: pointer; }
+
   /* Top Controls */
   .top-bar {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 24px;
     flex-wrap: wrap;
   }
-  .btn-reset {
-    background: #e74c3c;
-    color: white;
+  .btn-ctrl {
     border: none;
-    padding: 10px 24px;
+    padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     transition: all 0.2s;
   }
+  .btn-add-team { background: #3498db; color: white; }
+  .btn-add-team:hover { background: #5dade2; transform: scale(1.05); }
+  .btn-reset { background: #e74c3c; color: white; }
   .btn-reset:hover { background: #c0392b; transform: scale(1.05); }
-  .sort-toggle {
-    background: rgba(255,255,255,0.15);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.3);
-    padding: 10px 24px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: all 0.2s;
-  }
+  .sort-toggle { background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); }
   .sort-toggle:hover { background: rgba(255,255,255,0.25); }
-  .sort-toggle.active { background: #27ae60; border-color: #2ecc71; }
+  .sort-toggle.active { background: #27ae60; border-color: #2ecc71; border: 2px solid; }
 
   /* Grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
     max-width: 1400px;
     margin: 0 auto;
@@ -76,104 +120,213 @@
     background: rgba(255,255,255,0.07);
     border: 2px solid rgba(255,255,255,0.1);
     border-radius: 16px;
-    padding: 20px;
+    padding: 20px 16px 14px;
     text-align: center;
     transition: all 0.3s;
     position: relative;
-    overflow: hidden;
   }
-  .card:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.5); }
+  .card:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.4); }
   .card.rank-1 { background: rgba(255,215,0,0.15); border-color: #FFD700; }
   .card.rank-2 { background: rgba(192,192,192,0.12); border-color: #C0C0C0; }
   .card.rank-3 { background: rgba(205,127,50,0.12); border-color: #CD7F32; }
 
-  .rank-badge {
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    font-size: 1.3rem;
+  .rank-badge { position: absolute; top: 10px; left: 12px; font-size: 1.2rem; font-weight: bold; }
+
+  /* Delete team btn */
+  .btn-delete-team {
+    position: absolute; top: 8px; right: 10px;
+    background: none; border: none; color: rgba(255,255,255,0.25);
+    cursor: pointer; font-size: 1rem; padding: 2px 4px;
+    border-radius: 4px; transition: all 0.15s;
+  }
+  .btn-delete-team:hover { color: #e74c3c; background: rgba(231,76,60,0.15); }
+
+  /* Team name editable */
+  .team-name {
+    font-size: 1.25rem;
     font-weight: bold;
+    margin: 8px 4px 6px;
+    cursor: pointer;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.2s;
+    display: inline-block;
+    min-width: 60px;
+  }
+  .team-name:hover { border-bottom-color: rgba(255,255,255,0.4); }
+  .team-name[contenteditable="true"] {
+    outline: none;
+    border-bottom-color: #FFD700;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 0 4px;
   }
 
-  .team-name {
-    font-size: 1.4rem;
-    font-weight: bold;
-    margin-bottom: 8px;
-    margin-top: 4px;
-  }
   .score {
     font-size: 3rem;
     font-weight: bold;
     line-height: 1.1;
-    margin: 8px 0;
+    margin: 6px 0 2px;
     transition: transform 0.2s;
   }
-  .score.bump { transform: scale(1.3); }
+  .score.bump { transform: scale(1.35); }
   .score-label { font-size: 0.75rem; opacity: 0.5; margin-bottom: 12px; }
 
-  /* Score buttons */
-  .btn-row {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
+  .btn-row { display: flex; gap: 6px; justify-content: center; }
   .btn-score {
-    border: none;
-    border-radius: 8px;
-    padding: 8px 0;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: bold;
-    flex: 1;
-    transition: all 0.15s;
-    min-width: 0;
+    border: none; border-radius: 8px; padding: 10px 0;
+    cursor: pointer; font-size: 1rem; font-weight: bold;
+    flex: 1; transition: all 0.15s;
   }
-  .btn-score:active { transform: scale(0.92); }
+  .btn-score:active { transform: scale(0.9); }
   .btn-add { background: #27ae60; color: white; }
   .btn-add:hover { background: #2ecc71; }
   .btn-sub { background: #e74c3c; color: white; }
   .btn-sub:hover { background: #ff6b6b; }
 
-
-  /* History */
-  .history {
-    font-size: 0.7rem;
-    opacity: 0.45;
-    margin-top: 6px;
-    min-height: 16px;
-  }
-
   /* Log panel */
   .log-panel {
-    max-width: 1400px;
-    margin: 24px auto 0;
-    background: rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 16px 20px;
+    max-width: 1400px; margin: 24px auto 0;
+    background: rgba(0,0,0,0.3); border-radius: 12px; padding: 16px 20px;
   }
-  .log-title {
-    font-size: 0.9rem;
-    font-weight: bold;
-    opacity: 0.7;
-    margin-bottom: 8px;
-  }
+  .log-title { font-size: 0.9rem; font-weight: bold; opacity: 0.7; margin-bottom: 8px; }
   .log-list {
-    list-style: none;
-    max-height: 120px;
-    overflow-y: auto;
-    font-size: 0.82rem;
-    opacity: 0.7;
+    list-style: none; max-height: 120px; overflow-y: auto;
+    font-size: 0.82rem; opacity: 0.7;
   }
   .log-list li { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
   .log-list li.plus { color: #2ecc71; }
   .log-list li.minus { color: #ff6b6b; }
 
   @media (max-width: 600px) {
-    h1 { font-size: 1.5rem; }
+    h1 { font-size: 1.4rem; letter-spacing: 2px; }
     .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .score { font-size: 2.2rem; }
   }
+
+  /* ── 頒獎講台 ───────────────────────────────────────── */
+  .btn-award { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; }
+  .btn-award:hover { opacity: 0.85; transform: scale(1.05); }
+
+  .award-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, #0d0d2b 0%, #000 100%);
+    z-index: 2000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  .award-overlay.show { display: flex; }
+
+  /* Confetti canvas */
+  #confettiCanvas {
+    position: absolute; inset: 0; pointer-events: none;
+  }
+
+  .award-title {
+    position: absolute; top: 5%;
+    font-size: 3rem; font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 40px #FFD700, 0 0 80px #ff8c00;
+    letter-spacing: 6px;
+    animation: titlePulse 1.5s ease-in-out infinite alternate;
+    z-index: 10;
+    text-align: center;
+  }
+  @keyframes titlePulse {
+    from { text-shadow: 0 0 20px #FFD700, 0 0 40px #ff8c00; transform: scale(1); }
+    to   { text-shadow: 0 0 60px #FFD700, 0 0 120px #ff8c00; transform: scale(1.04); }
+  }
+
+  /* Podium stage */
+  .podium-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    max-width: 860px;
+    z-index: 10;
+  }
+
+  .podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .podium-item.reveal { opacity: 1; transform: translateY(0); }
+
+  .podium-avatar {
+    font-size: 3.5rem;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(255,255,255,0.5));
+  }
+  .podium-name {
+    font-size: 1.3rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  .podium-score {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    text-shadow: 0 0 20px currentColor;
+  }
+
+  .podium-block {
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .podium-block::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+  }
+
+  /* Heights */
+  .podium-item.p1 .podium-block { height: 220px; background: linear-gradient(135deg, #FFD700, #FFA500); box-shadow: 0 0 40px rgba(255,215,0,0.6); }
+  .podium-item.p2 .podium-block { height: 160px; background: linear-gradient(135deg, #b0b0b0, #808080); box-shadow: 0 0 30px rgba(192,192,192,0.5); }
+  .podium-item.p3 .podium-block { height: 110px; background: linear-gradient(135deg, #cd7f32, #8b4513); box-shadow: 0 0 20px rgba(205,127,50,0.4); }
+
+  .podium-item.p1 .podium-name  { color: #FFD700; font-size: 1.6rem; }
+  .podium-item.p2 .podium-name  { color: #e0e0e0; }
+  .podium-item.p3 .podium-name  { color: #cd7f32; }
+  .podium-item.p1 .podium-score { color: #FFD700; font-size: 2.4rem; }
+  .podium-item.p2 .podium-score { color: #e0e0e0; }
+  .podium-item.p3 .podium-score { color: #cd7f32; }
+
+  /* Glow ring on 1st */
+  .podium-item.p1 .podium-avatar {
+    animation: glowRing 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes glowRing {
+    from { filter: drop-shadow(0 0 8px #FFD700); }
+    to   { filter: drop-shadow(0 0 28px #FFD700) drop-shadow(0 0 8px #fff); }
+  }
+
+  .award-close {
+    position: absolute; top: 20px; right: 24px;
+    background: rgba(255,255,255,0.1); border: none; color: white;
+    font-size: 1.4rem; padding: 6px 14px; border-radius: 20px;
+    cursor: pointer; z-index: 20;
+  }
+  .award-close:hover { background: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
@@ -181,115 +334,242 @@
 <h1>🚀 追風少年科技培力</h1>
 <p class="subtitle">點擊加分 / 扣分按鈕，即時更新各組分數</p>
 
+<div id="fbStatus" class="fb-status disconnected">⏳ 連線中…</div>
+
 <div class="top-bar">
-  <button class="sort-toggle" id="sortBtn" onclick="toggleSort()">📊 依分數排序：關</button>
-  <button class="btn-reset" onclick="confirmReset()">🔄 重置所有分數</button>
+  <button class="btn-ctrl btn-add-team" onclick="addTeam()">＋ 新增組別</button>
+  <button class="btn-ctrl sort-toggle" id="sortBtn" onclick="toggleSort()">📊 依分數排序：關</button>
+  <button class="btn-ctrl btn-reset" onclick="confirmReset()">🔄 重置分數</button>
+  <button class="btn-ctrl btn-award" onclick="showAward()">🏆 頒獎時刻</button>
 </div>
 
 <div class="grid" id="grid"></div>
+
+<!-- 頒獎講台 -->
+<div class="award-overlay" id="awardOverlay">
+  <canvas id="confettiCanvas"></canvas>
+  <button class="award-close" onclick="closeAward()">✕ 關閉</button>
+  <div class="award-title">🏆 頒獎時刻 🏆</div>
+  <div class="podium-wrap" id="podiumWrap"></div>
+</div>
 
 <div class="log-panel">
   <div class="log-title">📋 操作記錄</div>
   <ul class="log-list" id="logList"></ul>
 </div>
 
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-const TEAM_COUNT = 10;
-const TEAM_COLORS = [
+// ════════════════════════════════════════════════════════
+// ★ 填入你的 Firebase 設定（從 Firebase Console 複製）★
+// ════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDw-B9w3pLBQD-jF2-t-OdxggP6aBKxVvs",
+  authDomain:        "addscore-7782b.firebaseapp.com",
+  databaseURL:       "https://addscore-7782b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "addscore-7782b",
+  storageBucket:     "addscore-7782b.firebasestorage.app",
+  messagingSenderId: "252046740671",
+  appId:             "1:252046740671:web:12d063638647b213d14a0a"
+};
+// ════════════════════════════════════════════════════════
+
+// ── Colors ──────────────────────────────────────────────
+const COLORS = [
   '#e74c3c','#e67e22','#f1c40f','#2ecc71','#1abc9c',
-  '#3498db','#9b59b6','#e91e63','#00bcd4','#8bc34a'
+  '#3498db','#9b59b6','#e91e63','#00bcd4','#8bc34a',
+  '#ff5722','#795548','#607d8b','#ff9800','#009688'
 ];
+function getColor(id) { return COLORS[id % COLORS.length]; }
 
-function loadData() {
-  const saved = localStorage.getItem('追風加分');
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    return parsed.teams || null;
-  }
-  return null;
-}
-
-function saveData() {
-  localStorage.setItem('追風加分', JSON.stringify({ teams, logs }));
-}
-
-function loadLogs() {
-  const saved = localStorage.getItem('追風加分');
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    return parsed.logs || [];
-  }
-  return [];
-}
-
-let teams = loadData() || Array.from({length: TEAM_COUNT}, (_, i) => ({
-  id: i,
-  name: `第 ${i+1} 組`,
-  score: 0
-}));
-
+// ── State ────────────────────────────────────────────────
+let teams = [];
+let logs  = [];
 let sortActive = false;
-let logs = loadLogs();
+let db = null;
+let isOnline = false;   // true = Firebase connected
+let nextId = 0;
+let pendingWrites = []; // ops queued while offline
 
-function getOrderedTeams() {
-  if (!sortActive) return [...teams].sort((a, b) => a.id - b.id);
-  return [...teams].sort((a, b) => b.score - a.score || a.id - b.id);
+// ── LocalStorage (offline cache only) ───────────────────
+const LS_KEY = '追風加分';
+
+function lsCache() {
+  // only write when offline; Firebase is source of truth when online
+  if (!isOnline) localStorage.setItem(LS_KEY, JSON.stringify({ teams, logs, nextId }));
+}
+function lsLoadCache() {
+  const s = localStorage.getItem(LS_KEY);
+  if (!s) return false;
+  const d = JSON.parse(s);
+  teams  = d.teams  || [];
+  logs   = d.logs   || [];
+  nextId = d.nextId || teams.length;
+  return true;
 }
 
-function getRankBadge(rank) {
-  if (rank === 1) return '🥇';
-  if (rank === 2) return '🥈';
-  if (rank === 3) return '🥉';
-  return `#${rank}`;
+// ── Firebase ─────────────────────────────────────────────
+function tryInitFirebase(cfg) {
+  try {
+    if (firebase.apps.length) firebase.apps[0].delete();
+    firebase.initializeApp(cfg);
+    db = firebase.database();
+
+    // Connection state
+    db.ref('.info/connected').on('value', snap => {
+      const connected = !!snap.val();
+      const el = document.getElementById('fbStatus');
+      if (connected && !isOnline) {
+        isOnline = true;
+        el.className = 'fb-status connected';
+        el.textContent = '🔥 Firebase 已連線';
+        // flush pending writes
+        pendingWrites.forEach(fn => fn());
+        pendingWrites = [];
+        localStorage.removeItem(LS_KEY); // clear offline cache
+      } else if (!connected) {
+        isOnline = false;
+        el.className = 'fb-status disconnected';
+        el.textContent = '⚠️ 網路斷線，使用本機暫存';
+      }
+    });
+
+    // Real-time listeners
+    db.ref('teams').on('value', snap => {
+      const data = snap.val();
+      if (data) {
+        teams = Object.values(data).sort((a,b) => a.id - b.id);
+        nextId = Math.max(...teams.map(t => t.id)) + 1;
+      } else {
+        // 第一次使用，預設建立 5 組
+        teams = Array.from({length: 5}, (_, i) => ({ id: i, name: `第 ${i+1} 組`, score: 0 }));
+        nextId = 5;
+        teams.forEach(t => db.ref(`teams/${t.id}`).set(t));
+      }
+      renderGrid();
+    });
+    db.ref('logs').on('value', snap => {
+      const data = snap.val();
+      logs = data ? Object.values(data).reverse().slice(0, 50) : [];
+      renderLog();
+    });
+
+    return true;
+  } catch(e) {
+    console.error('Firebase init failed', e);
+    return false;
+  }
 }
 
-function getRankClass(rank) {
-  if (rank === 1) return 'rank-1';
-  if (rank === 2) return 'rank-2';
-  if (rank === 3) return 'rank-3';
-  return '';
+// Write helpers — queue if offline, execute if online
+function write(fn) {
+  if (isOnline) { fn(); }
+  else { pendingWrites.push(fn); lsCache(); }
 }
 
+function fbSaveTeam(team) {
+  write(() => db.ref(`teams/${team.id}`).set(team));
+}
+function fbDeleteTeam(teamId) {
+  write(() => db.ref(`teams/${teamId}`).remove());
+}
+function fbSaveLog(entry) {
+  write(() => db.ref('logs').push(entry));
+}
+function fbReset() {
+  write(() => {
+    const updates = {};
+    teams.forEach(t => { updates[`teams/${t.id}/score`] = 0; });
+    db.ref().update(updates);
+    db.ref('logs').push({ text: `${now()}　⚠️ 所有分數已重置`, plus: false });
+  });
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function now() {
+  return new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+
+// ── Teams CRUD ───────────────────────────────────────────
+function addTeam() {
+  const team = { id: nextId++, name: `第 ${nextId} 組`, score: 0 };
+  teams.push(team);
+  fbSaveTeam(team);
+  if (!isOnline) renderGrid();
+}
+
+function deleteTeam(teamId) {
+  if (!confirm(`確定刪除「${teams.find(t=>t.id===teamId)?.name}」？`)) return;
+  teams = teams.filter(t => t.id !== teamId);
+  fbDeleteTeam(teamId);
+  if (!isOnline) renderGrid();
+}
+
+function renameTeam(teamId, newName) {
+  const t = teams.find(t => t.id === teamId);
+  if (!t || !newName) return;
+  t.name = newName;
+  fbSaveTeam(t);
+}
+
+// ── Scoring ──────────────────────────────────────────────
 function changeScore(teamId, delta) {
-  const team = teams[teamId];
-  const amount = delta;
-  team.score += amount;
-  if (team.score < 0) team.score = 0;
+  const team = teams.find(t => t.id === teamId);
+  if (!team) return;
+  team.score = Math.max(0, team.score + delta);
 
-  // Log
-  const sign = amount >= 0 ? '+' : '';
-  const now = new Date();
-  const time = now.toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  logs.unshift({ text: `${time}　${team.name}　${sign}${amount} 分　→ 共 ${team.score} 分`, plus: delta > 0 });
+  const sign = delta >= 0 ? '+' : '';
+  const entry = { text: `${now()}　${team.name}　${sign}${delta} 分　→ 共 ${team.score} 分`, plus: delta > 0 };
+  logs.unshift(entry);
   if (logs.length > 50) logs.pop();
 
-  saveData();
+  fbSaveTeam(team);
+  fbSaveLog(entry);
+  if (!isOnline) lsCache();
+
   renderGrid();
   renderLog();
 
-  // bump animation
   setTimeout(() => {
-    const scoreEl = document.querySelector(`[data-score="${teamId}"]`);
-    if (scoreEl) { scoreEl.classList.add('bump'); setTimeout(() => scoreEl.classList.remove('bump'), 200); }
+    const el = document.querySelector(`[data-score="${teamId}"]`);
+    if (el) { el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 200); }
   }, 10);
 }
 
+// ── Render ───────────────────────────────────────────────
+function getOrdered() {
+  const arr = [...teams];
+  return sortActive ? arr.sort((a,b) => b.score - a.score || a.id - b.id)
+                    : arr.sort((a,b) => a.id - b.id);
+}
+function getRankBadge(r) { return r===1?'🥇':r===2?'🥈':r===3?'🥉':`#${r}`; }
+function getRankClass(r) { return r<=3 ? `rank-${r}` : ''; }
+
 function renderGrid() {
-  const sorted = getOrderedTeams();
-  const scoreRank = [...teams].sort((a,b) => b.score - a.score);
+  const sorted = getOrdered();
   const rankMap = {};
-  scoreRank.forEach((t, i) => { rankMap[t.id] = i + 1; });
+  [...teams].sort((a,b)=>b.score-a.score||a.id-b.id).forEach((t,i)=>rankMap[t.id]=i+1);
 
-  const grid = document.getElementById('grid');
-  grid.innerHTML = sorted.map(team => {
+  document.getElementById('grid').innerHTML = sorted.map(team => {
     const rank = rankMap[team.id];
+    const color = getColor(team.id);
     return `
-    <div class="card ${getRankClass(rank)}" style="border-top: 4px solid ${TEAM_COLORS[team.id]}">
+    <div class="card ${getRankClass(rank)}" style="border-top:4px solid ${color}">
       <div class="rank-badge">${getRankBadge(rank)}</div>
-      <div class="team-name" style="color:${TEAM_COLORS[team.id]}">${team.name}</div>
-      <div class="score" data-score="${team.id}" style="color:${team.score===0?'rgba(255,255,255,0.3)':TEAM_COLORS[team.id]}">${team.score}</div>
+      <button class="btn-delete-team" onclick="deleteTeam(${team.id})" title="刪除此組">✕</button>
+      <div class="team-name" style="color:${color}"
+        contenteditable="false"
+        onclick="startRename(this)"
+        onblur="endRename(this, ${team.id})"
+        onkeydown="if(event.key==='Enter'){this.blur();}"
+        data-tid="${team.id}">${team.name}</div>
+      <div class="score" data-score="${team.id}"
+        style="color:${team.score===0?'rgba(255,255,255,0.25)':color}">${team.score}</div>
       <div class="score-label">分</div>
-
       <div class="btn-row">
         <button class="btn-score btn-add" onclick="changeScore(${team.id}, 1)">＋加分</button>
         <button class="btn-score btn-sub" onclick="changeScore(${team.id}, -1)">－扣分</button>
@@ -299,10 +579,25 @@ function renderGrid() {
 }
 
 function renderLog() {
-  const list = document.getElementById('logList');
-  list.innerHTML = logs.map(l => `<li class="${l.plus?'plus':'minus'}">${l.text}</li>`).join('');
+  document.getElementById('logList').innerHTML =
+    logs.map(l=>`<li class="${l.plus?'plus':'minus'}">${l.text}</li>`).join('');
 }
 
+// ── Rename inline ────────────────────────────────────────
+function startRename(el) {
+  el.contentEditable = 'true';
+  el.focus();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+}
+function endRename(el, teamId) {
+  el.contentEditable = 'false';
+  renameTeam(teamId, el.textContent.trim());
+}
+
+// ── Controls ─────────────────────────────────────────────
 function toggleSort() {
   sortActive = !sortActive;
   const btn = document.getElementById('sortBtn');
@@ -312,16 +607,105 @@ function toggleSort() {
 }
 
 function confirmReset() {
-  if (confirm('確定要重置所有組別的分數嗎？')) {
-    teams.forEach(t => { t.score = 0; });
-    logs.unshift({ text: `${new Date().toLocaleTimeString('zh-TW')}　⚠️ 所有分數已重置`, plus: false });
-    saveData();
-    renderGrid();
-    renderLog();
-  }
+  if (!confirm('確定重置所有組別分數？')) return;
+  teams.forEach(t => t.score = 0);
+  fbReset();
+  if (!isOnline) { lsCache(); renderGrid(); renderLog(); }
 }
 
-renderGrid();
+// ── 頒獎講台 ─────────────────────────────────────────────
+let confettiInterval = null;
+
+function showAward() {
+  const sorted = [...teams].sort((a,b) => b.score - a.score || a.id - b.id);
+  const top3 = sorted.slice(0, 3);
+  if (top3.length === 0) return alert('目前沒有任何組別！');
+
+  // Build podium: order = 2nd, 1st, 3rd
+  const order = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const classes = top3[1] ? ['p2','p1','p3'] : ['p1'];
+  const medals  = ['🥈','🥇','🥉'];
+  const rankLabels = ['2','1','3'];
+
+  const wrap = document.getElementById('podiumWrap');
+  wrap.innerHTML = order.map((team, i) => {
+    const cls = classes[i];
+    const medal = medals[i];
+    const rankNum = rankLabels[i];
+    const color = getColor(team.id);
+    return `
+    <div class="podium-item ${cls}" id="pi${i}">
+      <div class="podium-avatar">${medal}</div>
+      <div class="podium-name" style="color:${cls==='p1'?'#FFD700':cls==='p2'?'#e0e0e0':'#cd7f32'}">${team.name}</div>
+      <div class="podium-score" style="color:${cls==='p1'?'#FFD700':cls==='p2'?'#e0e0e0':'#cd7f32'}">${team.score} 分</div>
+      <div class="podium-block">${rankNum}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('awardOverlay').classList.add('show');
+
+  // Staggered reveal: 3rd → 2nd → 1st
+  const revealOrder = top3[1] ? [2, 0, 1] : [0]; // indices in wrap
+  revealOrder.forEach((idx, i) => {
+    setTimeout(() => {
+      document.getElementById(`pi${idx}`)?.classList.add('reveal');
+    }, 400 + i * 600);
+  });
+
+  // Start confetti after 800ms
+  setTimeout(startConfetti, 800);
+}
+
+function closeAward() {
+  document.getElementById('awardOverlay').classList.remove('show');
+  stopConfetti();
+}
+
+// ── Confetti ──────────────────────────────────────────────
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: ['#FFD700','#FF6B6B','#48DBFB','#FF9FF3','#54A0FF','#5F27CD','#00D2D3','#FF9F43'][Math.floor(Math.random()*8)],
+    rot: Math.random() * Math.PI * 2,
+    rotSpeed: (Math.random() - 0.5) * 0.1,
+    vx: (Math.random() - 0.5) * 2,
+    vy: Math.random() * 3 + 1.5,
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotSpeed;
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+    });
+  }
+  confettiInterval = setInterval(draw, 16);
+}
+
+function stopConfetti() {
+  clearInterval(confettiInterval);
+  confettiInterval = null;
+  const canvas = document.getElementById('confettiCanvas');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Init ─────────────────────────────────────────────────
+(function init() {
+  tryInitFirebase(FIREBASE_CONFIG);
+})();
 </script>
 </body>
 </html>

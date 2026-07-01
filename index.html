@@ -365,6 +365,9 @@
   <button class="btn-reveal" id="revealBtn" onclick="revealNext()">🎬 公布第三名</button>
 </div>
 
+<!-- 冠軍歡呼音效（本地音檔）-->
+<audio id="cheerAudio" src="Goal%20Cheer.wav" preload="auto"></audio>
+
 <!-- 隱藏的頒獎音樂播放器（YouTube 內嵌，不下載檔案）-->
 <div id="ytPlayer" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -662,61 +665,12 @@ function stopAwardMusic() {
   if (ytReady && ytPlayer) ytPlayer.pauseVideo();
 }
 
-// ── 冠軍歡呼音效（Web Audio 合成，免外部音檔）──────────────
-let sfxCtx = null;
-function getSfxCtx() {
-  if (!sfxCtx) sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (sfxCtx.state === 'suspended') sfxCtx.resume();
-  return sfxCtx;
-}
-
+// ── 冠軍歡呼音效（本地音檔 Goal Cheer.wav）─────────────────
 function playCheer() {
-  const ctx = getSfxCtx();
-  const t0 = ctx.currentTime;
-  const duration = 2.6;
-
-  // 群眾歡呼底噪（濾波過的白噪音）
-  const bufferSize = Math.floor(ctx.sampleRate * duration);
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.7;
-
-  const noise = ctx.createBufferSource();
-  noise.buffer = buffer;
-
-  const bandpass = ctx.createBiquadFilter();
-  bandpass.type = 'bandpass';
-  bandpass.frequency.value = 1400;
-  bandpass.Q.value = 0.5;
-
-  const noiseGain = ctx.createGain();
-  noiseGain.gain.setValueAtTime(0, t0);
-  noiseGain.gain.linearRampToValueAtTime(0.55, t0 + 0.12);
-  noiseGain.gain.linearRampToValueAtTime(0.4, t0 + duration * 0.6);
-  noiseGain.gain.linearRampToValueAtTime(0, t0 + duration);
-
-  noise.connect(bandpass);
-  bandpass.connect(noiseGain);
-  noiseGain.connect(ctx.destination);
-  noise.start(t0);
-  noise.stop(t0 + duration);
-
-  // 幾聲高音口哨式歡呼，增加熱鬧感
-  [0.25, 0.85, 1.5, 2.0].forEach(t => {
-    const whistle = ctx.createOscillator();
-    const wGain = ctx.createGain();
-    whistle.type = 'sine';
-    const startFreq = 1600 + Math.random() * 500;
-    whistle.frequency.setValueAtTime(startFreq, t0 + t);
-    whistle.frequency.linearRampToValueAtTime(startFreq + 500, t0 + t + 0.3);
-    wGain.gain.setValueAtTime(0, t0 + t);
-    wGain.gain.linearRampToValueAtTime(0.16, t0 + t + 0.05);
-    wGain.gain.linearRampToValueAtTime(0, t0 + t + 0.35);
-    whistle.connect(wGain);
-    wGain.connect(ctx.destination);
-    whistle.start(t0 + t);
-    whistle.stop(t0 + t + 0.4);
-  });
+  const audio = document.getElementById('cheerAudio');
+  if (!audio) return;
+  audio.currentTime = 0;
+  audio.play().catch(err => console.warn('歡呼音效播放失敗', err));
 }
 
 // ── 頒獎講台 ─────────────────────────────────────────────

@@ -353,6 +353,10 @@
   <div class="podium-wrap" id="podiumWrap"></div>
 </div>
 
+<!-- 隱藏的頒獎音樂播放器（YouTube 內嵌，不下載檔案）-->
+<div id="ytPlayer" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <div class="log-panel">
   <div class="log-title">📋 操作記錄</div>
   <ul class="log-list" id="logList"></ul>
@@ -613,6 +617,39 @@ function confirmReset() {
   if (!isOnline) { lsCache(); renderGrid(); renderLog(); }
 }
 
+// ── 頒獎音樂（內嵌 YouTube，不下載音檔）───────────────────
+// 影片：Music for Video Library「30 Minutes of Awards Music」
+// 使用其中 0:00 開始的「The Fanfare」段落
+const AWARD_VIDEO_ID = 'EB9e7EhLQqo';
+const AWARD_MUSIC_START = 0;   // 秒
+
+let ytPlayer = null;
+let ytReady = false;
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('ytPlayer', {
+    height: '0',
+    width: '0',
+    videoId: AWARD_VIDEO_ID,
+    playerVars: { controls: 0, disablekb: 1, playsinline: 1, modestbranding: 1 },
+    events: {
+      onReady: () => { ytReady = true; }
+    }
+  });
+}
+
+function playAwardMusic() {
+  if (!ytReady || !ytPlayer) return;
+  ytPlayer.seekTo(AWARD_MUSIC_START, true);
+  ytPlayer.setVolume(100);
+  ytPlayer.unMute();
+  ytPlayer.playVideo();
+}
+
+function stopAwardMusic() {
+  if (ytReady && ytPlayer) ytPlayer.pauseVideo();
+}
+
 // ── 頒獎講台 ─────────────────────────────────────────────
 let confettiInterval = null;
 
@@ -643,6 +680,7 @@ function showAward() {
   }).join('');
 
   document.getElementById('awardOverlay').classList.add('show');
+  playAwardMusic();
 
   // Staggered reveal: 3rd → 2nd → 1st
   const revealOrder = top3[1] ? [2, 0, 1] : [0]; // indices in wrap
@@ -659,6 +697,7 @@ function showAward() {
 function closeAward() {
   document.getElementById('awardOverlay').classList.remove('show');
   stopConfetti();
+  stopAwardMusic();
 }
 
 // ── Confetti ──────────────────────────────────────────────

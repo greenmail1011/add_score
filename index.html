@@ -327,6 +327,17 @@
     cursor: pointer; z-index: 20;
   }
   .award-close:hover { background: rgba(255,255,255,0.2); }
+
+  .btn-reveal {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, #f39c12, #e74c3c); color: white;
+    border: none; padding: 14px 32px; border-radius: 30px;
+    font-size: 1.1rem; font-weight: 900; cursor: pointer; z-index: 20;
+    box-shadow: 0 4px 24px rgba(243,156,18,0.55);
+    transition: all 0.2s;
+  }
+  .btn-reveal:hover { transform: translateX(-50%) scale(1.06); }
+  .btn-reveal:active { transform: translateX(-50%) scale(0.95); }
 </style>
 </head>
 <body>
@@ -351,6 +362,7 @@
   <button class="award-close" onclick="closeAward()">✕ 關閉</button>
   <div class="award-title">🏆 頒獎時刻 🏆</div>
   <div class="podium-wrap" id="podiumWrap"></div>
+  <button class="btn-reveal" id="revealBtn" onclick="revealNext()">🎬 公布第三名</button>
 </div>
 
 <!-- 隱藏的頒獎音樂播放器（YouTube 內嵌，不下載檔案）-->
@@ -682,16 +694,39 @@ function showAward() {
   document.getElementById('awardOverlay').classList.add('show');
   playAwardMusic();
 
-  // Staggered reveal: 3rd → 2nd → 1st
-  const revealOrder = top3[1] ? [2, 0, 1] : [0]; // indices in wrap
-  revealOrder.forEach((idx, i) => {
-    setTimeout(() => {
-      document.getElementById(`pi${idx}`)?.classList.add('reveal');
-    }, 400 + i * 600);
-  });
+  // 手動開獎順序：第三名 → 第二名 → 冠軍
+  revealPlan = top3[1] ? [
+    { idx: 2, label: '🎬 公布第三名' },
+    { idx: 0, label: '🎬 公布第二名' },
+    { idx: 1, label: '🎬 公布冠軍！' },
+  ] : [
+    { idx: 0, label: '🎬 公布冠軍！' },
+  ];
+  revealStep = 0;
+  updateRevealButton();
+}
 
-  // Start confetti after 800ms
-  setTimeout(startConfetti, 800);
+let revealPlan = [];
+let revealStep = 0;
+
+function updateRevealButton() {
+  const btn = document.getElementById('revealBtn');
+  if (!btn) return;
+  if (revealStep >= revealPlan.length) {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'inline-block';
+    btn.textContent = revealPlan[revealStep].label;
+  }
+}
+
+function revealNext() {
+  if (revealStep >= revealPlan.length) return;
+  const step = revealPlan[revealStep];
+  document.getElementById(`pi${step.idx}`)?.classList.add('reveal');
+  revealStep++;
+  if (revealStep >= revealPlan.length) startConfetti();
+  updateRevealButton();
 }
 
 function closeAward() {

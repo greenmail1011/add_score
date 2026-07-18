@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>追風少年科技培力加分系統</title>
+<title>2026｜AI無人機足球夏令營</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -109,7 +109,7 @@
   /* Grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
     max-width: 1400px;
     margin: 0 auto;
@@ -338,12 +338,78 @@
   }
   .btn-reveal:hover { transform: translateX(-50%) scale(1.06); }
   .btn-reveal:active { transform: translateX(-50%) scale(0.95); }
+
+  /* Title switcher */
+  .title-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-title-edit {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+    color: white; font-size: 0.85rem; padding: 5px 10px; border-radius: 20px;
+    cursor: pointer; opacity: 0.7;
+  }
+  .btn-title-edit:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+  .title-modal p { font-size: 0.82rem; opacity: 0.7; margin-bottom: 14px; line-height: 1.6; }
+  .title-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 8px;
+    background: rgba(255,255,255,0.05); cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .title-option:hover { background: rgba(255,255,255,0.1); }
+  .title-option.selected { border-color: #FFD700; background: rgba(255,215,0,0.1); }
+  .title-option input[type="radio"] { accent-color: #FFD700; }
+  .title-modal input[type="text"],
+  .title-modal select {
+    width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; color: white; padding: 9px 10px; font-size: 0.9rem; margin-top: 8px;
+  }
+  .title-modal select { cursor: pointer; }
+  .title-modal select option { background: #1e2a3a; color: white; }
+  .title-modal label { font-size: 0.8rem; opacity: 0.6; display: block; margin-top: 14px; }
+  .hist-list { max-height: 160px; overflow-y: auto; margin-top: 8px; }
+  .hist-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 7px 10px; border-radius: 8px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.05); font-size: 0.85rem;
+  }
+  .hist-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hist-row button {
+    background: none; border: none; color: rgba(255,255,255,0.35);
+    cursor: pointer; font-size: 0.95rem; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;
+  }
+  .hist-row button:hover { color: #e74c3c; background: rgba(231,76,60,0.15); }
+  .hist-actions { display: flex; gap: 2px; flex-shrink: 0; }
+  .hist-edit-input {
+    flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,215,0,0.5);
+    border-radius: 6px; color: white; padding: 4px 8px; font-size: 0.85rem; min-width: 0;
+  }
 </style>
 </head>
 <body>
 
-<h1>🚀 追風少年科技培力</h1>
+<div class="title-wrap">
+  <h1>🚀 <span id="pageTitleText">2026｜AI無人機足球夏令營</span></h1>
+  <button class="btn-title-edit" onclick="openTitleModal()" title="切換標題">✏️</button>
+</div>
 <p class="subtitle">點擊加分 / 扣分按鈕，即時更新各組分數</p>
+
+<!-- 標題切換 Modal -->
+<div class="modal-overlay" id="titleModalOverlay">
+  <div class="modal title-modal">
+    <h2>切換活動標題</h2>
+    <p>選擇一個標題，所有裝置會即時同步更新。</p>
+    <label for="titleHistorySelect">曾用過的標題</label>
+    <select id="titleHistorySelect" onchange="onHistorySelectChange()">
+      <option value="">— 請選擇 —</option>
+    </select>
+    <div class="hist-list" id="titleHistoryManageList"></div>
+    <label for="customTitleInput">或自行輸入新標題</label>
+    <input type="text" id="customTitleInput" placeholder="輸入新標題…" oninput="onCustomTitleInput()">
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeTitleModal()">取消</button>
+      <button class="btn-primary" onclick="saveTitleChoice()">儲存</button>
+    </div>
+  </div>
+</div>
 
 <div id="fbStatus" class="fb-status disconnected">⏳ 連線中…</div>
 
@@ -414,12 +480,138 @@ let isOnline = false;   // true = Firebase connected
 let nextId = 0;
 let pendingWrites = []; // ops queued while offline
 
+// ── Title switcher ───────────────────────────────────────
+const DEFAULT_TITLE  = '2026｜AI無人機足球夏令營';
+const SEED_TITLE_HISTORY = ['追風少年科技培力', '2026｜AI無人機足球夏令營'];
+let pageTitle = DEFAULT_TITLE;
+let titleHistory = [];
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function applyTitle(title) {
+  pageTitle = title;
+  document.getElementById('pageTitleText').textContent = title;
+  document.title = title;
+}
+
+function fbSaveTitle(title) {
+  write(() => db.ref('pageTitle').set(title));
+}
+
+function addToTitleHistory(title) {
+  if (!title) return;
+  titleHistory = [title, ...titleHistory.filter(t => t !== title)].slice(0, 30);
+}
+
+function fbSaveTitleHistory() {
+  write(() => db.ref('titleHistory').set(titleHistory));
+}
+
+function renderTitleHistoryUI() {
+  const select = document.getElementById('titleHistorySelect');
+  const prevVal = select.value;
+  select.innerHTML = '<option value="">— 請選擇 —</option>' +
+    titleHistory.map(t => `<option value="${escapeHtml(t)}" ${t === pageTitle ? 'selected' : ''}>${escapeHtml(t)}</option>`).join('');
+  if (titleHistory.includes(prevVal)) select.value = prevVal;
+
+  document.getElementById('titleHistoryManageList').innerHTML = titleHistory.map((t, i) => `
+    <div class="hist-row" id="histRow${i}">
+      <span title="${escapeHtml(t)}">${escapeHtml(t)}</span>
+      <div class="hist-actions">
+        <button onclick="startEditHistoryTitle(${i})" title="編輯此標題">✏️</button>
+        <button onclick="deleteHistoryTitle(${i})" title="刪除此標題紀錄">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function deleteHistoryTitle(i) {
+  const removed = titleHistory[i];
+  if (!removed) return;
+  titleHistory = titleHistory.filter((_, idx) => idx !== i);
+  fbSaveTitleHistory();
+  if (!isOnline) lsCache();
+  renderTitleHistoryUI();
+  // clear custom input if it matched the removed entry
+  const customInput = document.getElementById('customTitleInput');
+  if (customInput.value.trim() === removed) customInput.value = '';
+}
+
+function startEditHistoryTitle(i) {
+  const row = document.getElementById(`histRow${i}`);
+  const current = titleHistory[i];
+  row.innerHTML = `
+    <input type="text" class="hist-edit-input" id="histEdit${i}" value="${escapeHtml(current)}">
+    <div class="hist-actions">
+      <button onclick="saveEditHistoryTitle(${i})" title="儲存">✔</button>
+      <button onclick="renderTitleHistoryUI()" title="取消">✕</button>
+    </div>`;
+  const input = document.getElementById(`histEdit${i}`);
+  input.focus();
+  input.select();
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveEditHistoryTitle(i);
+    if (e.key === 'Escape') renderTitleHistoryUI();
+  });
+}
+
+function saveEditHistoryTitle(i) {
+  const input = document.getElementById(`histEdit${i}`);
+  const newVal = input.value.trim();
+  if (!newVal) { renderTitleHistoryUI(); return; }
+  const oldVal = titleHistory[i];
+  if (newVal === oldVal) { renderTitleHistoryUI(); return; }
+
+  titleHistory[i] = newVal;
+  // dedupe, keeping the first occurrence of any repeated title
+  titleHistory = titleHistory.filter((t, idx) => titleHistory.indexOf(t) === idx);
+
+  fbSaveTitleHistory();
+  if (!isOnline) lsCache();
+
+  if (pageTitle === oldVal) {
+    applyTitle(newVal);
+    fbSaveTitle(newVal);
+  }
+  renderTitleHistoryUI();
+}
+
+function openTitleModal() {
+  renderTitleHistoryUI();
+  document.getElementById('customTitleInput').value = titleHistory.includes(pageTitle) ? '' : pageTitle;
+  document.getElementById('titleModalOverlay').classList.add('show');
+}
+function closeTitleModal() {
+  document.getElementById('titleModalOverlay').classList.remove('show');
+}
+function onHistorySelectChange() {
+  const val = document.getElementById('titleHistorySelect').value;
+  if (val) document.getElementById('customTitleInput').value = '';
+}
+function onCustomTitleInput() {
+  const val = document.getElementById('customTitleInput').value;
+  if (val.trim()) document.getElementById('titleHistorySelect').value = '';
+}
+function saveTitleChoice() {
+  const customVal = document.getElementById('customTitleInput').value.trim();
+  const selectVal = document.getElementById('titleHistorySelect').value;
+  const newTitle = customVal || selectVal;
+  if (!newTitle) { alert('請選擇或輸入標題'); return; }
+  applyTitle(newTitle);
+  addToTitleHistory(newTitle);
+  fbSaveTitle(newTitle);
+  fbSaveTitleHistory();
+  if (!isOnline) lsCache();
+  closeTitleModal();
+}
+
 // ── LocalStorage (offline cache only) ───────────────────
 const LS_KEY = '追風加分';
 
 function lsCache() {
   // only write when offline; Firebase is source of truth when online
-  if (!isOnline) localStorage.setItem(LS_KEY, JSON.stringify({ teams, logs, nextId }));
+  if (!isOnline) localStorage.setItem(LS_KEY, JSON.stringify({ teams, logs, nextId, pageTitle, titleHistory }));
 }
 function lsLoadCache() {
   const s = localStorage.getItem(LS_KEY);
@@ -428,6 +620,8 @@ function lsLoadCache() {
   teams  = d.teams  || [];
   logs   = d.logs   || [];
   nextId = d.nextId || teams.length;
+  if (d.pageTitle) applyTitle(d.pageTitle);
+  titleHistory = (d.titleHistory && d.titleHistory.length) ? d.titleHistory : [...SEED_TITLE_HISTORY];
   return true;
 }
 
@@ -475,6 +669,27 @@ function tryInitFirebase(cfg) {
       const data = snap.val();
       logs = data ? Object.values(data).reverse().slice(0, 50) : [];
       renderLog();
+    });
+    db.ref('pageTitle').on('value', snap => {
+      const val = snap.val();
+      if (val) {
+        applyTitle(val);
+      } else {
+        applyTitle(DEFAULT_TITLE);
+        db.ref('pageTitle').set(DEFAULT_TITLE);
+      }
+    });
+    db.ref('titleHistory').on('value', snap => {
+      const val = snap.val();
+      if (Array.isArray(val) && val.length) {
+        titleHistory = val;
+      } else if (val && typeof val === 'object') {
+        titleHistory = Object.values(val);
+      } else {
+        titleHistory = [...SEED_TITLE_HISTORY];
+        db.ref('titleHistory').set(titleHistory);
+      }
+      if (document.getElementById('titleModalOverlay').classList.contains('show')) renderTitleHistoryUI();
     });
 
     return true;
@@ -578,7 +793,6 @@ function renderGrid() {
     const color = getColor(team.id);
     return `
     <div class="card ${getRankClass(rank)}" style="border-top:4px solid ${color}">
-      <div class="rank-badge">${getRankBadge(rank)}</div>
       <button class="btn-delete-team" onclick="deleteTeam(${team.id})" title="刪除此組">✕</button>
       <div class="team-name" style="color:${color}"
         contenteditable="false"
